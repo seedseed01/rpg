@@ -2,6 +2,7 @@ namespace rpg;
 
 public class Monster
 {
+    public string Name { get; set; }
     public int HP { get; set; }
     public int CurrentHP { get; set; }
     public int MP { get; set; }
@@ -15,10 +16,11 @@ public class Monster
     public CurrentType Type { get; set; }
     public Personality Nature { get; set; }
 
-    public Monster(int hp, int mp, int attack, int defense, int speed, int magicAttack, int magicDefense, int level,
+    public Monster(string name, int hp, int mp, int attack, int defense, int speed, int magicAttack, int magicDefense, int level,
                 CurrentStatus status, CurrentType type, Personality nature)
     {
         Level = level;
+        Name = name;
         Nature = nature;
         Status = status;
         Type = type;

@@ -18,45 +18,45 @@ public class Player
     public int MaxHP { get; set; }
     public int MaxMP { get; set; }
 
-    public int Attack { get; set; } = 20;
-    public int Defense { get; set; } = 20;
-    public int Speed { get; set; } = 20;
-    public int MagicAttack { get; set; } = 20;
-    public int MagicDefense { get; set; } = 20;
+    public int Attack { get; set; }
+    public int Defense { get; set; }
+    public int Speed { get; set; }
+    public int MagicAttack { get; set; }
+    public int MagicDefense { get; set; }
 
-    public Player(string name, int hp, int mp, int attack, int defense, int speed, int magicAttack, int magicDefense, int level,
+    public Player(string name, int hp, int mp, int attack, int defense, int magicAttack, int magicDefense, int speed, int level,
                 CurrentStatus status, CurrentType type, Personality nature)
     {
         Name = name;
-        Level = level;        
+        Level = level;
         Status = status;
         Type = type;
         Nature = nature;
 
         var (atkM, defM, matkM, mdefM, spdM) = GetNatureModifiers(Nature);
 
-        // 3. 賦值給最終屬性，有性格加成
-        MaxHP = hp;
+        MaxHP = hp + (level - 1) * 20;
         CurrentHP = MaxHP;
-        MaxMP = mp;
-        Attack = (int)(attack * atkM);
-        Defense = (int)(defense * defM);
-        MagicAttack = (int)(magicAttack * matkM);
-        MagicDefense = (int)(magicDefense * mdefM);
-        Speed = (int)(speed * spdM);
+        MaxMP = mp + (level - 1) * 10;
+        CurrentMP = MaxMP;
+        Attack = (attack + (level - 1) * 10) * atkM;
+        Defense = (defense + (level - 1) * 10) * defM;
+        MagicAttack = (magicAttack + (level - 1) * 10) * matkM;
+        MagicDefense = (magicDefense + (level - 1) * 10) * mdefM;
+        Speed = (speed + (level - 1) * 10) * spdM;
     }
 
-    // 💡 把性格加成抽取成私有方法，避免重複程式碼
-    private (double atk, double def, double matk, double mdef, double spd) GetNatureModifiers(Personality nature)
+    // 性格加成計算
+    private (int atk, int def, int matk, int mdef, int spd) GetNatureModifiers(Personality nature)
     {
         return nature switch
         {
-            Personality.Aggressive => (1.2, 0.9, 1.0, 1.0, 1.0),
-            Personality.Cautious   => (0.9, 1.2, 1.0, 1.0, 1.0),
-            Personality.Focused    => (1.0, 1.0, 1.2, 0.9, 1.0),
-            Personality.Meditative => (1.0, 1.0, 0.9, 1.2, 1.0),
-            Personality.Swift      => (1.0, 0.9, 1.0, 0.9, 1.2),
-            _                     => (1.0, 1.0, 1.0, 1.0, 1.0)
+            Personality.Aggressive => (3, 1, 2, 2, 2),
+            Personality.Cautious => (1, 3, 2, 2, 2),
+            Personality.Focused => (2, 2, 3, 1, 2),
+            Personality.Meditative => (2, 2, 1, 3, 2),
+            Personality.Swift => (2, 1, 2, 1, 3),
+            _ => (2, 2, 2, 2, 2)
         };
     }
 
@@ -84,11 +84,11 @@ public class Player
         // 設定升級成長數值（可根據職業微調）
         int hpGain = 20;
         int mpGain = 10;
-        int atkGain = (int)(10 * atkM);
-        int defGain = (int)(10 * defM);
-        int matkGain = (int)(10 * matkM);
-        int mdefGain = (int)(10 * mdefM);
-        int spdGain = (int)(10 * spdM);
+        int atkGain = 10 * atkM;
+        int defGain = 10 * defM;
+        int matkGain = 10 * matkM;
+        int mdefGain = 10 * mdefM;
+        int spdGain = 10 * spdM;
 
         // 提升最大面板
         MaxHP += hpGain;
@@ -141,7 +141,7 @@ public class Player
         if (attacker == CurrentType.Fire && defender == CurrentType.Water) return 0.6;
         if (attacker == CurrentType.Wind && defender == CurrentType.Fire) return 0.6;
         if (attacker == CurrentType.Earth && defender == CurrentType.Wind) return 0.6;
-        
+
         return 1.0;
     }
 }

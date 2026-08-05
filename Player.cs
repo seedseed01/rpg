@@ -33,40 +33,31 @@ public class Player
         Type = type;
         Nature = nature;
 
-        double atkMulti = 1.0, defMulti = 1.0, matkMulti = 1.0, mdefMulti = 1.0, spdMulti = 1.0;
-        switch (nature)
-        {
-            case Personality.Aggressive: // 暴躁 (物攻 +20%, 物防 -10%)
-                atkMulti = 1.2;
-                defMulti = 0.9;
-                break;
-            case Personality.Cautious:   // 謹慎 (物防 +20%, 物攻 -10%)
-                defMulti = 1.2;
-                atkMulti = 0.9;
-                break;
-            case Personality.Focused:    // 專注 (魔攻 +20%, 魔防 -10%)
-                matkMulti = 1.2;
-                mdefMulti = 0.9;
-                break;
-            case Personality.Meditative: // 冥想 (魔防 +20%, 魔攻 -10%)
-                mdefMulti = 1.2;
-                matkMulti = 0.9;
-                break;
-            case Personality.Swift:      // 神行 (速度 +20%, 物防 -10%, 魔防 -10%)
-                spdMulti = 1.2;
-                defMulti = 0.9;
-                mdefMulti = 0.9;
-                break;
-        }
+        var (atkM, defM, matkM, mdefM, spdM) = GetNatureModifiers(Nature);
+
         // 3. 賦值給最終屬性，有性格加成
         MaxHP = hp;
         CurrentHP = MaxHP;
         MaxMP = mp;
-        Attack = (int)(attack * atkMulti);
-        Defense = (int)(defense * defMulti);
-        MagicAttack = (int)(magicAttack * matkMulti);
-        MagicDefense = (int)(magicDefense * mdefMulti);
-        Speed = (int)(speed * spdMulti);
+        Attack = (int)(attack * atkM);
+        Defense = (int)(defense * defM);
+        MagicAttack = (int)(magicAttack * matkM);
+        MagicDefense = (int)(magicDefense * mdefM);
+        Speed = (int)(speed * spdM);
+    }
+
+    // 💡 把性格加成抽取成私有方法，避免重複程式碼
+    private (double atk, double def, double matk, double mdef, double spd) GetNatureModifiers(Personality nature)
+    {
+        return nature switch
+        {
+            Personality.Aggressive => (1.2, 0.9, 1.0, 1.0, 1.0),
+            Personality.Cautious   => (0.9, 1.2, 1.0, 1.0, 1.0),
+            Personality.Focused    => (1.0, 1.0, 1.2, 0.9, 1.0),
+            Personality.Meditative => (1.0, 1.0, 0.9, 1.2, 1.0),
+            Personality.Swift      => (1.0, 0.9, 1.0, 0.9, 1.2),
+            _                     => (1.0, 1.0, 1.0, 1.0, 1.0)
+        };
     }
 
     // 💡 獲得經驗值的方法
@@ -88,41 +79,16 @@ public class Player
     {
         Level++;
 
-        double atkMulti = 1.0, defMulti = 1.0, matkMulti = 1.0, mdefMulti = 1.0, spdMulti = 1.0;
-
-        switch (Nature)
-        {
-            case Personality.Aggressive: // 暴躁 (物攻 +20%, 物防 -10%)
-                atkMulti = 1.2;
-                defMulti = 0.9;
-                break;
-            case Personality.Cautious:   // 謹慎 (物防 +20%, 物攻 -10%)
-                defMulti = 1.2;
-                atkMulti = 0.9;
-                break;
-            case Personality.Focused:    // 專注 (魔攻 +20%, 魔防 -10%)
-                matkMulti = 1.2;
-                mdefMulti = 0.9;
-                break;
-            case Personality.Meditative: // 冥想 (魔防 +20%, 魔攻 -10%)
-                mdefMulti = 1.2;
-                matkMulti = 0.9;
-                break;
-            case Personality.Swift:      // 神行 (速度 +20%, 物防 -10%, 魔防 -10%)
-                spdMulti = 1.2;
-                defMulti = 0.9;
-                mdefMulti = 0.9;
-                break;
-        }
+        var (atkM, defM, matkM, mdefM, spdM) = GetNatureModifiers(Nature);
 
         // 設定升級成長數值（可根據職業微調）
         int hpGain = 20;
         int mpGain = 10;
-        int atkGain = (int)(10 * atkMulti);
-        int defGain = (int)(10 * defMulti);
-        int matkGain = (int)(10 * matkMulti);
-        int mdefGain = (int)(10 * mdefMulti);
-        int spdGain = (int)(10 * spdMulti);
+        int atkGain = (int)(10 * atkM);
+        int defGain = (int)(10 * defM);
+        int matkGain = (int)(10 * matkM);
+        int mdefGain = (int)(10 * mdefM);
+        int spdGain = (int)(10 * spdM);
 
         // 提升最大面板
         MaxHP += hpGain;

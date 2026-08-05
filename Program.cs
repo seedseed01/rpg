@@ -1,10 +1,11 @@
 ﻿using Spectre.Console;
 
-namespace RPG;
+namespace rpg;
 
 class Program
 {
     private static string? _name;
+    public record MenuItem(int Id, string DisplayName);
 
     static void Main(string[] args)
     {
@@ -18,8 +19,45 @@ class Program
 
         var name = AnsiConsole.Ask<string>("輸入您的名字 [green]name[/]?");
         _name = name;
-        
-        // 2. 用表格做一個角色狀態欄
+
+        while (true)
+        {
+            // 選項:角色狀態、戰鬥畫面、退出
+            var choice = AnsiConsole.Prompt(
+                new SelectionPrompt<MenuItem>()
+                    .Title("[cyan]請選擇一個選項[/]")
+                    .PageSize(5)
+                    .UseConverter(item => item.DisplayName)
+                    .AddChoices(new[] {
+                        new MenuItem(1, "1. 角色狀態"),
+                        new MenuItem(2, "2. 戰鬥畫面"),
+                        new MenuItem(3, "3. 退出")
+                    }));
+            
+            // 清空畫面
+            AnsiConsole.Clear();
+    
+            switch (choice.Id)
+            {
+                case 1:
+                    ShowInfo();
+                    break;
+                case 2:
+                    // Battle();
+                    // break;
+                case 3:
+                    AnsiConsole.MarkupLine("[yellow]感謝使用！[/]");
+                    return;                    
+                default:
+                    AnsiConsole.MarkupLine("[red]選擇錯誤！[/]");
+                    break;
+            }
+        }
+    }
+
+    public static void ShowInfo()
+    {
+        // 用表格做一個角色狀態欄
         var statusTable = new Table()
             .Border(TableBorder.Rounded)
             .AddColumn("[yellow]屬性[/]")
@@ -37,20 +75,5 @@ class Program
                 .Expand());
 
         AnsiConsole.WriteLine(); // 留一行空行
-
-        // 3. 建立支援【方向鍵 ↑ ↓ 選擇】的互動選單
-        var action = AnsiConsole.Prompt(
-            new SelectionPrompt<string>()
-                .Title($"[cyan]前面出現了一隻哥布林！{_name}要怎麼做？[/]")
-                .PageSize(5)
-                .AddChoices(new[] {
-                    "⚔️ 揮劍攻擊",
-                    "🛡️ 舉盾防禦",
-                    "🎒 打開背包",
-                    "🏃 嘗試逃跑"
-                }));
-
-        // 4. 印出選擇結果
-        AnsiConsole.MarkupLine($"\n你選擇了：[bold yellow]{action}[/]");
     }
 }

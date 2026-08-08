@@ -35,15 +35,15 @@ public class Player
 
         var (atkM, defM, matkM, mdefM, spdM) = GetNatureModifiers(Nature);
 
-        MaxHP = hp + (level - 1) * 20;
+        MaxHP = hp + (level - 1) * 10;
         CurrentHP = MaxHP;
         MaxMP = mp + (level - 1) * 10;
         CurrentMP = MaxMP;
-        Attack = (attack + (level - 1) * 10) * atkM;
-        Defense = (defense + (level - 1) * 10) * defM;
-        MagicAttack = (magicAttack + (level - 1) * 10) * matkM;
-        MagicDefense = (magicDefense + (level - 1) * 10) * mdefM;
-        Speed = (speed + (level - 1) * 10) * spdM;
+        Attack = attack + (level - 1) * 5 * atkM;
+        Defense = defense + (level - 1) * 5 * defM;
+        MagicAttack = magicAttack + (level - 1) * 5 * matkM;
+        MagicDefense = magicDefense + (level - 1) * 5 * mdefM;
+        Speed = speed + (level - 1) * 5 * spdM;
     }
 
     // 性格加成計算
@@ -82,13 +82,13 @@ public class Player
         var (atkM, defM, matkM, mdefM, spdM) = GetNatureModifiers(Nature);
 
         // 設定升級成長數值（可根據職業微調）
-        int hpGain = 20;
+        int hpGain = 10;
         int mpGain = 10;
-        int atkGain = 10 * atkM;
-        int defGain = 10 * defM;
-        int matkGain = 10 * matkM;
-        int mdefGain = 10 * mdefM;
-        int spdGain = 10 * spdM;
+        int atkGain = 5 * atkM;
+        int defGain = 5 * defM;
+        int matkGain = 5 * matkM;
+        int mdefGain = 5 * mdefM;
+        int spdGain = 5 * spdM;
 
         // 提升最大面板
         MaxHP += hpGain;

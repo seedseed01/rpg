@@ -6,11 +6,13 @@ public class ShowStatusInfo
 {
     private Player player;
     private Monster monster;
+    private bool isShowing = false;
 
-    public ShowStatusInfo(Player player, Monster monster)
+    public ShowStatusInfo(Player player, Monster monster, bool isShowing)
     {
         this.player = player;
         this.monster = monster;
+        this.isShowing = isShowing;
     }
 
 
@@ -54,12 +56,29 @@ public class ShowStatusInfo
             .AddRow("魔防 (MD)", $"{monster.MagicDefense}")
             .AddRow("速度 (SP)", $"{monster.Speed}");
 
+        var unknownTable = new Table()
+            .Border(TableBorder.Rounded)
+            .AddColumn("[red]屬性[/]")
+            .AddColumn("[red]數值[/]")
+            .AddRow("名稱", monster.Name)
+            .AddRow("等級", $"[yellow]Lv.**[/]")
+            .AddRow("血量 (HP)", $"[red]*** / ***[/]")
+            .AddRow("魔力 (MP)", $"[blue]*** / ***[/] ")
+            .AddRow("狀態", $"[green]**[/]")
+            .AddRow("屬性", $"[yellow]**[/]")
+            .AddRow("性格", $"[yellow]**[/]")
+            .AddRow("攻擊 (AT)", $"***")
+            .AddRow("防禦 (DE)", $"***")
+            .AddRow("魔攻 (MA)", $"***")
+            .AddRow("魔防 (MD)", $"***")
+            .AddRow("速度 (SP)", $"***");
+
         // 使用並排兩欄 Table 把雙方面板放進去
         var layoutTable = new Table()
             .Border(TableBorder.None)
             .AddColumn(new TableColumn("[green]=== 玩家資訊 ===[/]").Centered())
-            .AddColumn(new TableColumn("[red]=== 遭遇怪物 ===[/]").Centered())
-            .AddRow(playerTable, monsterTable);
+            .AddColumn(new TableColumn("[red]=== 敵人資訊 ===[/]").Centered())
+            .AddRow(playerTable, isShowing ? monsterTable : unknownTable);
 
         AnsiConsole.Write(layoutTable);
         AnsiConsole.WriteLine();

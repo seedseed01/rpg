@@ -6,7 +6,7 @@ public class BattleSystem
 {
     private Player player;
     private Monster monster;
-    private bool isPlayerDefending = false;
+    private bool isPlayerDefending = false, isPlayerRunning = false, isPlayerRunningfalse = false;
 
     public BattleSystem(Player player, Monster monster)
     {
@@ -25,14 +25,11 @@ public class BattleSystem
 
         int round = 1;
 
-        // 🔄 戰鬥主要迴圈：只要雙方都還有血量，就持續進行回合
+        // 戰鬥主要迴圈：只要雙方都還有血量，就持續進行回合
         while (player.CurrentHP > 0 && monster.CurrentHP > 0)
         {
             AnsiConsole.Clear();
             RenderBattleScreen(round);
-
-            // 1. 重置回合狀態（如防禦狀態）
-            isPlayerDefending = false;
 
             // 2. 判斷先攻順序 (速度高者先手)
             bool playerFirst = player.Speed >= monster.Speed;
@@ -40,8 +37,12 @@ public class BattleSystem
             if (playerFirst)
             {
                 // 玩家先手
-                ExecutePlayerTurn();
+                ExecutePlayerTurn();                
+                if (isPlayerRunning) break; // 玩家逃跑了，直接結束
                 if (monster.CurrentHP <= 0) break; // 怪物被擊倒，直接結束
+
+                AnsiConsole.Clear();
+                RenderBattleScreen(round); // 行動後更新血條
 
                 ExecuteMonsterTurn();
             }
@@ -52,7 +53,11 @@ public class BattleSystem
                 ExecuteMonsterTurn();
                 if (player.CurrentHP <= 0) break; // 玩家被擊倒，直接結束
 
+                AnsiConsole.Clear();
+                RenderBattleScreen(round); // 行動後更新血條
+
                 ExecutePlayerTurn();
+                if (isPlayerRunning) break; // 玩家逃跑了，直接結束
             }
 
             round++;
@@ -88,6 +93,10 @@ public class BattleSystem
     {
         AnsiConsole.MarkupLine("[bold green]👉 輪到你的回合！[/]");
 
+        // 重置回合狀態，輪到玩家時才重置上一回合的狀態
+        isPlayerDefending = false; // 防禦狀態
+        isPlayerRunningfalse = false; // 逃跑狀態
+
         var action = AnsiConsole.Prompt(
             new SelectionPrompt<string>()
                 .Title("[cyan]請選擇行動：[/]")
@@ -100,6 +109,9 @@ public class BattleSystem
 
         if (action.Contains("物理攻擊"))
         {
+            // 1. 播放斬擊動畫！(畫面會彈出動畫視窗播放 0.5 秒)
+            // AnimationHelper.PlayAsync(player.Name, monster.Name).Wait();
+
             AnsiConsole.MarkupLine($"[green]{player.Name}[/] 發動了物理攻擊！");
             int oldHP = monster.CurrentHP;
 
@@ -136,11 +148,23 @@ public class BattleSystem
         else if (action.Contains("逃跑"))
         {
             AnsiConsole.MarkupLine("[yellow]你倉皇逃跑了...[/]");
-            monster.CurrentHP = 0; // 強制結束戰鬥
+            Random random = new Random();
+            // 有50%的逃跑機會
+            if (random.Next(0, 100) < 50)
+            {
+                AnsiConsole.MarkupLine("[yellow]逃跑失敗，你破綻大開![/]");
+                isPlayerRunningfalse = true;
+            }
+            else
+            {                
+                AnsiConsole.MarkupLine("[yellow]逃跑成功![/]");
+                isPlayerRunning = true;
+            }
         }
+        Console.ReadKey(true);
     }
 
-    // 👹 怪物 AI 回合邏輯
+    // 怪物 AI 回合邏輯
     private void ExecuteMonsterTurn()
     {
         if (monster.CurrentHP <= 0) return;
@@ -154,6 +178,10 @@ public class BattleSystem
         {
             rawDamage /= 2;
             AnsiConsole.MarkupLine("[grey]（因為防禦姿態，受到的傷害減半！）[/]");
+        }else if (isPlayerRunningfalse)
+        {
+            rawDamage *= 2;
+            AnsiConsole.MarkupLine("[grey]（因破綻大開，受到的傷害加倍！）[/]");
         }
 
         int oldHP = player.CurrentHP;
@@ -161,6 +189,7 @@ public class BattleSystem
 
         int damageTaken = oldHP - player.CurrentHP;
         AnsiConsole.MarkupLine($"{monster.Name}對你造成了 [bold red]{damageTaken}[/] 點傷害！");
+        Console.ReadKey(true);
     }
 
     // 🏆 勝負與獎勵發放
@@ -169,7 +198,13 @@ public class BattleSystem
         AnsiConsole.WriteLine();
         AnsiConsole.Write(new Rule("[bold yellow]戰鬥結束[/]").Centered());
 
-        if (player.CurrentHP > 0 && monster.CurrentHP <= 0)
+        if (isPlayerRunning)
+        {
+            AnsiConsole.MarkupLine($"[bold yellow]你逃離戰鬥了！[/]");
+            Console.ReadKey(true);
+            return false;
+        }
+        else if (player.CurrentHP > 0 && monster.CurrentHP <= 0)
         {
             AnsiConsole.MarkupLine($"[bold green]戰鬥勝利！你戰勝了{monster.Name}！[/]");
 
@@ -177,14 +212,12 @@ public class BattleSystem
             int expReward = monster.Level * 50;
             player.GainEXP(expReward);
 
-            AnsiConsole.MarkupLine("[grey]按任意鍵繼續...[/]");
             Console.ReadKey(true);
             return true;
         }
         else
         {
             AnsiConsole.MarkupLine($"[bold red]你被{monster.Name}擊倒了... 冒險結束。[/]");
-            AnsiConsole.MarkupLine("[grey]按任意鍵返回...[/]");
             Console.ReadKey(true);
             return false;
         }

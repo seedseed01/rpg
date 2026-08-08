@@ -6,29 +6,15 @@ namespace rpg;
 class Program
 {
     public record MenuItem(int Id, string DisplayName);
-
+    private static bool isShowing = false;
+    
     [SupportedOSPlatform("windows")]
     static void Main()
     {
-        Console.SetWindowSize(120, 30);
-        int windowWidth = Console.WindowWidth;        
+        Console.SetWindowSize(100, 30);
+        int windowWidth = Console.WindowWidth;
 
-        // 初始化玩家與怪物實例（作為遊戲狀態）
-        Player player = new Player(
-            name: "AAAAAA",
-            hp: 100,
-            mp: 100,
-            attack: 20,
-            defense: 20,
-            magicAttack: 10,
-            magicDefense: 10,
-            speed: 10,
-            level: 1,
-            status: CurrentStatus.Normal,
-            type: CurrentType.Earth,
-            nature: Personality.Focused);
-
-        Monster goblin = new Goblin(5);
+        Goblin goblin = new Goblin(5);
 
         // 主選單迴圈
         while (true)
@@ -36,18 +22,14 @@ class Program
             AnsiConsole.Clear();
             AnsiConsole.WriteLine();
 
-            // 1. 印出標題
-            AnsiConsole.Write(
-                new FigletText("RPG GAME")
-                    .Centered()
-                    .Color(Color.Red));
-
+            // 印出標題
+            AnsiConsole.MarkupLine($"[bold red]{GameArt.TitleArt}[/]");
             AnsiConsole.WriteLine();
 
             // 主選單
             var mainMenuChoice = AnsiConsole.Prompt(
                 new SelectionPrompt<MenuItem>()
-                    .PageSize(5)
+                    .PageSize(3)
                     .UseConverter(item => CenterText(item.DisplayName, windowWidth))
                     .AddChoices(new[] {
                         new MenuItem(1, "開始遊戲"),
@@ -61,17 +43,26 @@ class Program
             }
 
             // 2. 選擇「開始遊戲」後進入次選單迴圈
-            GameLoop(player, goblin, windowWidth);
+            GameLoop(windowWidth);
         }
     }
 
     // 遊戲主要選單 (雙方狀態 / 進入戰鬥)
-    private static void GameLoop(Player player, Monster monster, int windowWidth)
+    private static void GameLoop(int windowWidth)
     {
+        // 玩家選擇職業、個性、屬性
+        AnsiConsole.Clear();
+        StorySystem.PlayStoryAsync("intro.json").Wait();
+
+        Player player = PlayerStart.SelectedPlayer();
+
+        Monster monster = new Goblin(5);
+
         while (true)
         {
             AnsiConsole.Clear();
-            AnsiConsole.Write(new Rule("[bold cyan]冒險者大廳[/]").Centered());
+            AnsiConsole.MarkupLine($"[bold yellow]{GameArt.Day1Art}[/]");
+            AnsiConsole.MarkupLine($"{GameArt.TownArt}");
             AnsiConsole.WriteLine();
 
             var gameMenuChoice = AnsiConsole.Prompt(
@@ -93,7 +84,8 @@ class Program
                 case 2:
                     // 4. 進入戰鬥程序
                     StartBattle(player, monster);
-                    monster = new Goblin(player.Level);
+                    
+                    monster = new Goblin(player.Level > 5 ? player.Level : 5);
                     break;
                 case 3:
                     return; // 回到主選單
@@ -104,7 +96,7 @@ class Program
     // 3. 呈現敵我兩方資訊
     public static void ShowBothStatus(Player player, Monster monster)
     {
-        ShowStatusInfo showStatusInfo = new ShowStatusInfo(player, monster);
+        ShowStatusInfo showStatusInfo = new ShowStatusInfo(player, monster, isShowing);
         showStatusInfo.ShowInfo();
 
         // 提示按任一鍵回上一頁
@@ -121,9 +113,10 @@ class Program
 
         if (!isVictory)
         {
-            // 如果玩家戰敗，血量重置/復活，方便繼續測試
             player.CurrentHP = player.MaxHP;
             player.CurrentMP = player.MaxMP;
+            AnsiConsole.MarkupLine("[yellow]血條重置...[/]");
+            Console.ReadKey(true);
         }
     }
 

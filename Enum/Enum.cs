@@ -5,11 +5,11 @@ public enum CurrentStatus
     Normal,      // 一般
     Dead,        // 死亡
     Poisoned,    // 中毒 (逐漸扣 HP)
-    ManaDrain,   // 迷幻 (逐漸扣 MP，亦可用 Psyched/ManaBleed)
+    ManaDrain,   // 迷幻 (逐漸扣 MP)
     Paralyzed,   // 麻痺
     Asleep,      // 睡眠
     Weakened,    // 無力 (攻擊力降低)
-    Muddled,     // 無神 (魔力/精神力降低，亦可用 Dazed/Enfeebled)
+    Muddled,     // 無神 (精神力降低)
 }
 
 public enum CurrentType

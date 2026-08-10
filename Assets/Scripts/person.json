@@ -1,0 +1,58 @@
+[
+  {
+    "Name": "村長",
+    "Talk": "年輕人加油啊，都靠你了!",
+    "EventInfo": "得到村長的激勵，經驗增加!",
+    "EffectType": "ExUp",
+    "Value": 50
+  },
+  {
+    "Name": "狗",
+    "Talk": "汪汪汪汪汪汪汪汪!",
+    "EventInfo": "不小心踩到狗，被狗咬傷...",
+    "EffectType": "HpDown",
+    "Value": 20
+  },
+  {
+    "Name": "三姑",
+    "Talk": "哎呀呀，這不是那個小英雄嗎? 來來來聊天吧!",
+    "EventInfo": "被村裡長舌婦纏上，精神疲憊",
+    "EffectType": "MpDown",
+    "Value": 50
+  },
+  {
+    "Name": "吟遊詩人",
+    "Talk": "啦啦啦啦啦~~嗚啦啦啦啦~~",
+    "EventInfo": "聽了吟遊詩人演唱，信心加持，感覺力量湧現",
+    "EffectType": "AtkUp",
+    "Value": 10
+  },
+  {
+    "Name": "漁夫",
+    "Talk": "欸同學同學，這個你拿一下，我是前面那艘船上的漁夫啦，這是我們自己做的小魚乾...",
+    "EventInfo": "被強迫推銷不好吃又沒營養的小魚乾，金錢白白損失",
+    "EffectType": "GoldLoss",
+    "Value": 50
+  },
+  {
+    "Name": "阿明",
+    "Talk": "阿薛在村莊附近擺了超多陷阱，你走路要小心不要踩到喔",
+    "EventInfo": "為避免踩到陷阱，你專注在走路上，但走幾分鐘後就放棄了，但專注時間也鍛鍊了你的精神力。",
+    "EffectType": "MatkUp",
+    "Value": 10
+  },
+  {
+    "Name": "貓",
+    "Talk": "喵.....",
+    "EventInfo": "貓愛理不理的，為了逗貓浪費太多時間",
+    "EffectType": "PointDown",
+    "Value": 2
+  },
+  {
+    "Name": "光頭長老",
+    "Talk": "小子，我家的那隻猴子又跑掉了。你去幫我追回來",
+    "EventInfo": "你在森林裡費盡千辛萬苦才終於抓到牠，也學習了猴子的移動方式",
+    "EffectType": "SpeedUp",
+    "Value": 10
+  }
+]

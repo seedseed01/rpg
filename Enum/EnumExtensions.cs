@@ -39,4 +39,22 @@ public static class EnumExtensions
         Personality.Balanced => "平衡",
         _ => nature.ToString()
     };
+
+    // 3. 個性/性格中文轉換
+    public static string ToChinese(this ItemEffectType itemEffectType) => itemEffectType switch
+    {
+        ItemEffectType.AtkBoost => "加攻擊",
+        ItemEffectType.DefBoost => "加防禦",
+        ItemEffectType.MatkBoost => "加魔攻",
+        ItemEffectType.MdefBoost => "加魔防",
+        ItemEffectType.SpeedBoost => "加速度",
+        ItemEffectType.HealHp => "增加 HP",
+        ItemEffectType.HealMp => "增加 MP",
+        ItemEffectType.ChangeType => "改變屬性",
+        ItemEffectType.CureStatus => "解除異常",
+        ItemEffectType.LevelUp => "玩家升級",
+        ItemEffectType.LevelDown => "敵人降級",
+        ItemEffectType.LookAll => "知曉魔物",
+        _ => itemEffectType.ToString()
+    };      
 }

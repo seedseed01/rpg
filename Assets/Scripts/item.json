@@ -1,0 +1,86 @@
+[
+  {
+    "ItemNo": 1,
+    "ItemTitle": "力量藥水",
+    "ItemContent": "可增加攻擊力10點",
+    "EffectType": "AtkBoost",
+    "Value": 10
+  },
+  {
+    "ItemNo": 2,
+    "ItemTitle": "防禦藥水",
+    "ItemContent": "可增加防禦力10點",
+    "EffectType": "DefBoost",
+    "Value": 10
+  },
+  {
+    "ItemNo": 3,
+    "ItemTitle": "魔法藥水",
+    "ItemContent": "可增魔力10點",
+    "EffectType": "MatkBoost",
+    "Value": 10
+  },
+  {
+    "ItemNo": 4,
+    "ItemTitle": "魔防藥水",
+    "ItemContent": "可增加魔防10點",
+    "EffectType": "MdefBoost",
+    "Value": 10
+  },
+  {
+    "ItemNo": 5,
+    "ItemTitle": "速度藥水",
+    "ItemContent": "可增加速度10點",
+    "EffectType": "SpeedBoost",
+    "Value": 10
+  },
+  {
+    "ItemNo": 6,
+    "ItemTitle": "血量藥水",
+    "ItemContent": "可增加血量50點",
+    "EffectType": "HealHp",
+    "Value": 50
+  },
+  {
+    "ItemNo": 7,
+    "ItemTitle": "能量藥水",
+    "ItemContent": "可增加MP50點",
+    "EffectType": "HealMp",
+    "Value": 50
+  },
+  {
+    "ItemNo": 8,
+    "ItemTitle": "元素藥水",
+    "ItemContent": "可隨機改變屬性",
+    "EffectType": "ChangeType",
+    "Value": 0
+  },
+  {
+    "ItemNo": 9,
+    "ItemTitle": "萬能藥水",
+    "ItemContent": "可解異常狀態",
+    "EffectType": "CureStatus",
+    "Value": 0
+  },
+  {
+    "ItemNo": 10,
+    "ItemTitle": "升級藥水",
+    "ItemContent": "可提升自己等級 5等",
+    "EffectType": "LevelUp",
+    "Value": 5
+  },
+  {
+    "ItemNo": 11,
+    "ItemTitle": "降級藥水",
+    "ItemContent": "可降低魔物等級 5等",
+    "EffectType": "LevelDown",
+    "Value": 5
+  },
+  {
+    "ItemNo": 12,
+    "ItemTitle": "解讀藥水",
+    "ItemContent": "可知曉該回合的魔物能力",
+    "EffectType": "LookAll",
+    "Value": 0
+  }
+]

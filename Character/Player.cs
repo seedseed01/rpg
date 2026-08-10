@@ -75,7 +75,7 @@ public class Player
     }
 
     // 💡 升級邏輯：成長公式寫在這裡！
-    private void LevelUp()
+    public void LevelUp()
     {
         Level++;
 

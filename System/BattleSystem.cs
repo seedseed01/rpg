@@ -6,7 +6,9 @@ public class BattleSystem
 {
     private Player player;
     private Monster monster;
-    private bool isPlayerDefending = false, isPlayerRunning = false, isPlayerRunningfalse = false;
+    private bool isPlayerDefending = false;
+    public static bool isPlayerRunning = false;
+    private bool isPlayerRunningfalse = false;
 
     public BattleSystem(Player player, Monster monster)
     {
@@ -97,6 +99,24 @@ public class BattleSystem
         isPlayerDefending = false; // 防禦狀態
         isPlayerRunningfalse = false; // 逃跑狀態
 
+        if(player.Status == CurrentStatus.Paralyzed)
+        {
+            AnsiConsole.MarkupLine("你在麻痺中，有機率無法行動");
+            Console.ReadKey(true);
+            int r = Random.Shared.Next(0, 100);
+            // 50%機率無法行動
+            if(r > 50)
+            {
+                AnsiConsole.MarkupLine("你無法行動，因為麻痺");
+                return;     
+            }
+            else
+            {
+                AnsiConsole.MarkupLine("這回合狀況還不錯，麻痺沒影響到你的行動");
+            }
+            Console.ReadKey(true);
+        }
+
         var action = AnsiConsole.Prompt(
             new SelectionPrompt<string>()
                 .Title("[cyan]請選擇行動：[/]")
@@ -114,9 +134,17 @@ public class BattleSystem
 
             AnsiConsole.MarkupLine($"[green]{player.Name}[/] 發動了物理攻擊！");
             int oldHP = monster.CurrentHP;
-
+            int WeakenedAttack = player.Attack;
             // 呼叫怪物的 TakeDamage (傳入物理傷害與屬性)
-            monster.TakeDamage(player.Attack, player.Type, isMagicAttack: false);
+
+            // 如果玩家無力，攻擊力降到7成
+            if(player.Status == CurrentStatus.Weakened)
+            {
+                AnsiConsole.MarkupLine("你無力中，攻擊力會比預計的還低");
+                WeakenedAttack = (int)(player.Attack * 0.7);   
+            }
+           
+            monster.TakeDamage(WeakenedAttack, player.Type, isMagicAttack: false);
 
             int damageDealt = oldHP - monster.CurrentHP;
             AnsiConsole.MarkupLine($"對{monster.Name}造成了 [bold red]{damageDealt}[/] 點傷害！");
@@ -134,7 +162,14 @@ public class BattleSystem
                 AnsiConsole.MarkupLine($"[green]{player.Name}[/] 吟唱魔法，發動 [bold cyan]{player.Type}[/] 屬性攻擊！");
 
                 int oldHP = monster.CurrentHP;
-                monster.TakeDamage(player.MagicAttack, player.Type, isMagicAttack: true);
+                int WeakenedAttack = player.MagicAttack;
+                if(player.Status == CurrentStatus.Muddled)
+                {
+                    AnsiConsole.MarkupLine("你無神中，魔法攻擊力會比預計的還低");
+                    WeakenedAttack = (int)(player.MagicAttack * 0.7);  
+                } 
+
+                monster.TakeDamage(WeakenedAttack, player.Type, isMagicAttack: true);
 
                 int damageDealt = oldHP - monster.CurrentHP;
                 AnsiConsole.MarkupLine($"魔法造成了 [bold red]{damageDealt}[/] 點魔法傷害！");
@@ -161,6 +196,27 @@ public class BattleSystem
                 isPlayerRunning = true;
             }
         }
+
+        if(player.Status != CurrentStatus.Normal)
+        {
+            switch (player.Status)
+            {
+                case CurrentStatus.Poisoned:
+                    AnsiConsole.MarkupLine("你中毒了，血量在每回合降低...");
+                    int countH = (int)(player.CurrentHP * 0.2);
+                    AnsiConsole.MarkupLine($"血量減少 {countH} 點");
+                    player.CurrentHP = Math.Max(0, player.CurrentHP - countH);
+                    break;
+                
+                case CurrentStatus.ManaDrain:
+                    AnsiConsole.MarkupLine("你在迷幻中，MP在每回合降低...");
+                    int countM = (int)(player.CurrentMP * 0.2);
+                    AnsiConsole.MarkupLine($"MP減少 {countM} 點");
+                    player.CurrentMP = Math.Max(0, player.CurrentMP - countM);
+                    break;
+            }
+        }
+
         Console.ReadKey(true);
     }
 
@@ -217,7 +273,7 @@ public class BattleSystem
         }
         else
         {
-            AnsiConsole.MarkupLine($"[bold red]你被{monster.Name}擊倒了... 冒險結束。[/]");
+            AnsiConsole.MarkupLine($"[bold red]你被{monster.Name}擊倒了... 請再鍛鍊鍛鍊。[/]");
             Console.ReadKey(true);
             return false;
         }

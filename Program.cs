@@ -6,15 +6,20 @@ namespace rpg;
 class Program
 {
     public record MenuItem(int Id, string DisplayName);
-    private static bool isShowing = false;
+    public static bool isShowing = false;
+    public static int actionPoint = 5;
+    public static int dayCount = 1;
+    public static Inventory Inventory = new();
+    public static Player player = null!;
+    public static int gold = 100;
     
     [SupportedOSPlatform("windows")]
     static void Main()
     {
         Console.SetWindowSize(100, 30);
         int windowWidth = Console.WindowWidth;
-
-        Goblin goblin = new Goblin(5);
+        ItemDatabase.Init();
+        EventDatabase.Init();
 
         // 主選單迴圈
         while (true)
@@ -47,77 +52,155 @@ class Program
         }
     }
 
-    // 遊戲主要選單 (雙方狀態 / 進入戰鬥)
+    // 遊戲主要選單
     private static void GameLoop(int windowWidth)
     {
         // 玩家選擇職業、個性、屬性
         AnsiConsole.Clear();
         StorySystem.PlayStoryAsync("intro.json").Wait();
 
-        Player player = PlayerStart.SelectedPlayer();
-
+        player = PlayerStart.SelectedPlayer();
         Monster monster = new Goblin(5);
 
-        while (true)
+        while (dayCount < 6)
         {
             AnsiConsole.Clear();
             AnsiConsole.MarkupLine($"[bold yellow]{GameArt.Day1Art}[/]");
             AnsiConsole.MarkupLine($"{GameArt.TownArt}");
             AnsiConsole.WriteLine();
-
+            AnsiConsole.MarkupLine($"[bold #00FF00]行動點數剩餘: {actionPoint}[/]");
+            AnsiConsole.MarkupLine($"[bold #FFD700]擁有錢幣: {gold}[/]");
+            AnsiConsole.WriteLine();
             var gameMenuChoice = AnsiConsole.Prompt(
                 new SelectionPrompt<MenuItem>()
-                    .PageSize(5)
+                    .PageSize(6)
                     .UseConverter(item => CenterText(item.DisplayName, windowWidth))
                     .AddChoices(new[] {
                         new MenuItem(1, "檢視雙方狀態"),
-                        new MenuItem(2, "進入戰鬥"),
-                        new MenuItem(3, "返回主選單")
+                        new MenuItem(2, "鎮上閒晃"),
+                        new MenuItem(3, "奇貨商人"),
+                        new MenuItem(4, "使用道具"),
+                        new MenuItem(5, "進入戰鬥"),
+                        new MenuItem(6, "返回主選單")
                     }));
 
             switch (gameMenuChoice.Id)
             {
                 case 1:
-                    // 3. 執行雙方狀態並可按任一鍵返回
                     ShowBothStatus(player, monster);
                     break;
                 case 2:
-                    // 4. 進入戰鬥程序
-                    StartBattle(player, monster);
-                    
-                    monster = new Goblin(player.Level > 5 ? player.Level : 5);
+                    TownWalk();
                     break;
                 case 3:
-                    return; // 回到主選單
+                    Trader();
+                    break;
+                case 4:
+                    UseItem(player, monster);
+                    break;
+                case 5:
+                    StartBattle(player, monster);                    
+                    monster = new Goblin(player.Level > 5 ? player.Level : 5);
+                    break;
+                case 6:
+                    // 離開後初始化數據
+                    actionPoint = 5;
+                    Inventory = new();
+                    isShowing = false;
+                    return;
             }
         }
     }
 
-    // 3. 呈現敵我兩方資訊
+    public static void TownWalk()
+    {
+        if (actionPoint < 1)
+        {
+            AnsiConsole.MarkupLine("[yellow]已無行動力，請去面對魔物！[/]");
+            Console.ReadKey(true);
+            return;  
+        }
+        actionPoint--;
+        TownWalk townWalk = new TownWalk();
+        townWalk.Walk();
+    }
+
+    public static void Trader()
+    {
+        if (actionPoint < 1)
+        {
+            AnsiConsole.MarkupLine("[yellow]已無行動力，請去面對魔物！[/]");
+            Console.ReadKey(true);
+            return;  
+        } 
+        actionPoint--;
+    }
+
+    public static void UseItem(Player player, Monster? monster)
+    {
+        if (actionPoint < 1)
+        {
+            AnsiConsole.MarkupLine("[yellow]已無行動力，請去面對魔物！[/]");
+            Console.ReadKey(true);
+            return;  
+        } 
+  
+
+        // 呼叫你的背包系統加入道具
+       // 1. 呼叫背包選單，拿到玩家選的道具
+        ItemNode? chosenItem = Inventory.ShowAndUseItemMenu();
+
+        // 2. 如果玩家有選道具（沒有選取消）
+        if (chosenItem != null)
+        {
+            // 套用道具效果（扣血/加能力等）
+            Inventory.ApplyItemEffect(chosenItem, player);
+
+            // 背包扣除 1 個該道具
+            Inventory.UseItem(chosenItem.ItemNo);
+            actionPoint--;
+        }
+    }
+
     public static void ShowBothStatus(Player player, Monster monster)
     {
         ShowStatusInfo showStatusInfo = new ShowStatusInfo(player, monster, isShowing);
         showStatusInfo.ShowInfo();
 
-        // 提示按任一鍵回上一頁
         AnsiConsole.MarkupLine("[grey]按下 [/][bold yellow]任意鍵[/][grey] 返回上一頁...[/]");
         Console.ReadKey(true);
     }
 
-    // 4. 進入戰鬥程序
+
     public static void StartBattle(Player player, Monster monster)
     {
         // 建立戰鬥系統實例，並啟動戰鬥
         BattleSystem battle = new BattleSystem(player, monster);
         bool isVictory = battle.StartBattle();
 
-        if (!isVictory)
+        // 如果是逃跑出場，就不進行回血，並增加行動力1點
+        if (BattleSystem.isPlayerRunning)
+        {            
+            if (actionPoint < 5) actionPoint++;
+            return;  
+        } 
+        
+        player.CurrentHP = player.MaxHP;
+        player.CurrentMP = player.MaxMP;
+        AnsiConsole.MarkupLine("[yellow]村裡醫生幫你治療傷勢...[/]");
+        Console.ReadKey(true);
+        
+        if (isVictory)
         {
-            player.CurrentHP = player.MaxHP;
-            player.CurrentMP = player.MaxMP;
-            AnsiConsole.MarkupLine("[yellow]血條重置...[/]");
-            Console.ReadKey(true);
+            // 勝利恢復狀態
+            player.Status = CurrentStatus.Normal;
+            actionPoint = 5;
         }
+        else
+        {
+            if (actionPoint < 5) actionPoint++;
+        }
+
     }
 
     // 計算字串在 Terminal 上的「顯示寬度」（中文算 2 寬度）

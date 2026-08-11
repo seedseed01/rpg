@@ -161,8 +161,18 @@ public class Inventory
             case ItemEffectType.LevelDown:
                 if (monster != null)
                 {
-                    monster.Level = Math.Max(1, monster.Level - item.Value);                    
+                    monster.Level = Math.Max(1, monster.Level - item.Value);                  
                     AnsiConsole.MarkupLine($"[purple]魔物等級降低了 {item.Value} 等！[/]");
+                    Program.monster = monster switch
+                    {
+                        Goblin => new Goblin( monster.Level),
+                        GuestTree => new GuestTree( monster.Level),
+                        Stone => new Stone( monster.Level),
+                        Bird => new Bird( monster.Level),
+                        DarkHero => new DarkHero( monster.Level),
+                        _ => new Goblin( monster.Level)
+                    };
+
                     Console.ReadKey(true);
                 }
                 break;

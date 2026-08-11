@@ -83,7 +83,7 @@ public class BattleSystem
             .AddColumn(new TableColumn($"[red]{monster.Name} (Lv.{monster.Level})[/]").Centered())
             .AddRow(
                 $"HP: [red]{player.CurrentHP}/{player.MaxHP}[/]\nMP: [blue]{player.CurrentMP}/{player.MaxMP}[/]",
-                $"HP: [red]{monster.CurrentHP}/{monster.HP}[/]\nMP: [blue]{monster.MP}[/]"
+                $"HP: [red]{monster.CurrentHP}/{monster.HP}[/]\nMP: [blue]{monster.CurrentMP}/{monster.MP}[/]"
             );
 
         AnsiConsole.Write(statusTable);
@@ -93,11 +93,12 @@ public class BattleSystem
     // 🗡️ 玩家回合邏輯
     private void ExecutePlayerTurn()
     {
-        AnsiConsole.MarkupLine("[bold green]👉 輪到你的回合！[/]");
+        AnsiConsole.MarkupLine("[bold green]輪到你的回合！[/]");
 
         // 重置回合狀態，輪到玩家時才重置上一回合的狀態
         isPlayerDefending = false; // 防禦狀態
-        isPlayerRunningfalse = false; // 逃跑狀態
+        isPlayerRunningfalse = false; // 逃跑失敗狀態
+        isPlayerRunning = false; // 逃跑狀態
 
         if(player.Status == CurrentStatus.Paralyzed)
         {
@@ -127,8 +128,13 @@ public class BattleSystem
                     "逃跑 (Run)"
                 }));
 
-        if (action.Contains("物理攻擊"))
+        if (action.Contains("物理攻擊") || (action.Contains("元素魔法") && player.CurrentMP < 10))
         {
+            if (action.Contains("元素魔法"))
+            {
+                AnsiConsole.MarkupLine("[yellow]魔力 (MP) 不足！強制改為普通攻擊！[/]");                
+            }
+
             // 1. 播放斬擊動畫！(畫面會彈出動畫視窗播放 0.5 秒)
             // AnimationHelper.PlayAsync(player.Name, monster.Name).Wait();
 
@@ -151,29 +157,21 @@ public class BattleSystem
         }
         else if (action.Contains("元素魔法"))
         {
-            if (player.CurrentMP < 10)
+            player.CurrentMP -= 10;
+            AnsiConsole.MarkupLine($"[green]{player.Name}[/] 吟唱魔法，發動 [bold cyan]{player.Type}[/] 屬性攻擊！");
+
+            int oldHP = monster.CurrentHP;
+            int WeakenedAttack = player.MagicAttack;
+            if(player.Status == CurrentStatus.Muddled)
             {
-                AnsiConsole.MarkupLine("[yellow]魔力 (MP) 不足！強制改為普通攻擊！[/]");
-                monster.TakeDamage(player.Attack, player.Type, isMagicAttack: false);
-            }
-            else
-            {
-                player.CurrentMP -= 10;
-                AnsiConsole.MarkupLine($"[green]{player.Name}[/] 吟唱魔法，發動 [bold cyan]{player.Type}[/] 屬性攻擊！");
+                AnsiConsole.MarkupLine("你無神中，魔法攻擊力會比預計的還低");
+                WeakenedAttack = (int)(player.MagicAttack * 0.7);  
+            } 
 
-                int oldHP = monster.CurrentHP;
-                int WeakenedAttack = player.MagicAttack;
-                if(player.Status == CurrentStatus.Muddled)
-                {
-                    AnsiConsole.MarkupLine("你無神中，魔法攻擊力會比預計的還低");
-                    WeakenedAttack = (int)(player.MagicAttack * 0.7);  
-                } 
+            monster.TakeDamage(WeakenedAttack, player.Type, isMagicAttack: true);
 
-                monster.TakeDamage(WeakenedAttack, player.Type, isMagicAttack: true);
-
-                int damageDealt = oldHP - monster.CurrentHP;
-                AnsiConsole.MarkupLine($"魔法造成了 [bold red]{damageDealt}[/] 點魔法傷害！");
-            }
+            int damageDealt = oldHP - monster.CurrentHP;
+            AnsiConsole.MarkupLine($"魔法造成了 [bold red]{damageDealt}[/] 點魔法傷害！");
         }
         else if (action.Contains("防禦"))
         {
@@ -197,7 +195,7 @@ public class BattleSystem
             }
         }
 
-        if(player.Status != CurrentStatus.Normal)
+        if(player.Status != CurrentStatus.Normal && isPlayerRunning == false)
         {
             switch (player.Status)
             {
@@ -227,13 +225,12 @@ public class BattleSystem
 
         AnsiConsole.MarkupLine($"\n[bold red]{monster.Name}的回合！[/]");
 
-        // 簡單 AI：預設物理攻擊，防禦狀態下傷害減半
-        int rawDamage = monster.Attack;
+        var (rawDamage, isMagicAttack) = monster.SkillAttack();
 
         if (isPlayerDefending)
         {
-            rawDamage /= 2;
-            AnsiConsole.MarkupLine("[grey]（因為防禦姿態，受到的傷害減半！）[/]");
+            rawDamage = (int)(rawDamage * 0.7);
+            AnsiConsole.MarkupLine("[grey]（因為防禦姿態，受到的傷害減少！）[/]");
         }else if (isPlayerRunningfalse)
         {
             rawDamage *= 2;
@@ -241,7 +238,7 @@ public class BattleSystem
         }
 
         int oldHP = player.CurrentHP;
-        player.TakeDamage(rawDamage, monster.Type, isMagicAttack: false);
+        player.TakeDamage(rawDamage, monster.Type, isMagicAttack);
 
         int damageTaken = oldHP - player.CurrentHP;
         AnsiConsole.MarkupLine($"{monster.Name}對你造成了 [bold red]{damageTaken}[/] 點傷害！");

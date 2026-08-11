@@ -7,11 +7,15 @@ class Program
 {
     public record MenuItem(int Id, string DisplayName);
     public static bool isShowing = false;
-    public static int actionPoint = 5;
+    public static int actionPoint = 8;
     public static int dayCount = 1;
     public static Inventory Inventory = new();
     public static Player player = null!;
+    public static Monster monster = null!;
     public static int gold = 100;
+    public static int runningCount = 0; // 逃跑次數
+    public static int battleCount = 0;  // 戰鬥次數
+    public static int loseCount = 0;    // 失敗次數
     
     [SupportedOSPlatform("windows")]
     static void Main()
@@ -60,16 +64,25 @@ class Program
         StorySystem.PlayStoryAsync("intro.json").Wait();
 
         player = PlayerStart.SelectedPlayer();
-        Monster monster = new Goblin(5);
+        monster = new Goblin(5);
 
         while (dayCount < 6)
         {
-            AnsiConsole.Clear();
-            AnsiConsole.MarkupLine($"[bold yellow]{GameArt.Day1Art}[/]");
+            string t = dayCount switch
+            {
+                1 => GameArt.Day1Art,
+                2 => GameArt.Day2Art,
+                3 => GameArt.Day3Art,
+                4 => GameArt.Day4Art,
+                5 => GameArt.Day5Art,
+                _ => GameArt.Day1Art
+            };
+
+            AnsiConsole.Clear();            
             AnsiConsole.MarkupLine($"{GameArt.TownArt}");
             AnsiConsole.WriteLine();
+            AnsiConsole.MarkupLine($"[bold yellow]{t}[/]");
             AnsiConsole.MarkupLine($"[bold #00FF00]行動點數剩餘: {actionPoint}[/]");
-            AnsiConsole.MarkupLine($"[bold #FFD700]擁有錢幣: {gold}[/]");
             AnsiConsole.WriteLine();
             var gameMenuChoice = AnsiConsole.Prompt(
                 new SelectionPrompt<MenuItem>()
@@ -78,7 +91,7 @@ class Program
                     .AddChoices(new[] {
                         new MenuItem(1, "檢視雙方狀態"),
                         new MenuItem(2, "鎮上閒晃"),
-                        new MenuItem(3, "奇貨商人"),
+                        // new MenuItem(3, "奇貨商人"),
                         new MenuItem(4, "使用道具"),
                         new MenuItem(5, "進入戰鬥"),
                         new MenuItem(6, "返回主選單")
@@ -87,29 +100,62 @@ class Program
             switch (gameMenuChoice.Id)
             {
                 case 1:
-                    ShowBothStatus(player, monster);
+                    ShowBothStatus();
                     break;
                 case 2:
                     TownWalk();
                     break;
-                case 3:
-                    Trader();
-                    break;
+                // case 3:
+                //     Trader();
+                //     break;
                 case 4:
-                    UseItem(player, monster);
+                    UseItem();
                     break;
                 case 5:
-                    StartBattle(player, monster);                    
-                    monster = new Goblin(player.Level > 5 ? player.Level : 5);
+                    StartBattle();
                     break;
                 case 6:
                     // 離開後初始化數據
-                    actionPoint = 5;
+                    actionPoint = 8;
                     Inventory = new();
                     isShowing = false;
                     return;
             }
         }
+
+        AnsiConsole.Clear();
+        AnsiConsole.WriteLine();
+        AnsiConsole.MarkupLine("[bold #AFFF00]結局 [/]");
+        string story = "因為你的努力，村莊幸免於難!\n\n大陸上幾乎九成的村莊覆滅，剩餘的人決定將這些勇敢挺身而出的英雄們集結在一起，向魔王討還失去的一切!\n";
+        var panel = new Panel(story)
+        {
+            Border = BoxBorder.DoubleVertical,
+            BorderStyle = new Style(Color.Cyan1),
+            Width = 60
+        };
+
+        AnsiConsole.Write(new Align(panel, HorizontalAlignment.Left));
+        Console.ReadKey(true);
+        AnsiConsole.MarkupLine("[bold #AFFF00]統計此次遊戲數據: [/]");
+        AnsiConsole.MarkupLine("--------------------------------------------------------------------------------");
+        AnsiConsole.MarkupLine($"[bold #FFD787]戰鬥次數: {battleCount}[/]");
+        AnsiConsole.MarkupLine($"[bold #FFD787]逃跑次數: {runningCount}[/]");
+        AnsiConsole.MarkupLine($"[bold #FFD787]失敗次數: {loseCount}[/]");
+        AnsiConsole.MarkupLine("--------------------------------------------------------------------------------");
+        AnsiConsole.MarkupLine($"[bold #FF5F00]最終能力數據: [/]");
+        AnsiConsole.MarkupLine($"[bold #FF5F00]名稱: {player.Name}[/]");
+        AnsiConsole.MarkupLine($"[bold #FF5F00]狀態: {player.Status.ToChinese()}[/]");
+        AnsiConsole.MarkupLine($"[bold #FF5F00]屬性: {player.Type.ToChinese()}[/]");
+        AnsiConsole.MarkupLine($"[bold #FF5F00]性格: {player.Nature.ToChinese()}[/]");
+        AnsiConsole.MarkupLine($"[bold #FF5F00]等級: {player.Level}[/]");
+        AnsiConsole.MarkupLine($"[bold #FF5F00]HP: {player.MaxHP}[/]");
+        AnsiConsole.MarkupLine($"[bold #FF5F00]MP: {player.MaxMP}[/]");
+        AnsiConsole.MarkupLine($"[bold #FF5F00]攻擊力: {player.Attack}[/]");
+        AnsiConsole.MarkupLine($"[bold #FF5F00]防禦力: {player.Defense}[/]");
+        AnsiConsole.MarkupLine($"[bold #FF5F00]魔法攻擊力: {player.MagicAttack}[/]");
+        AnsiConsole.MarkupLine($"[bold #FF5F00]魔法防禦力: {player.MagicDefense}[/]");
+        AnsiConsole.MarkupLine($"[bold #FF5F00]速度: {player.Speed}[/]");
+        Console.ReadKey(true);
     }
 
     public static void TownWalk()
@@ -117,6 +163,7 @@ class Program
         if (actionPoint < 1)
         {
             AnsiConsole.MarkupLine("[yellow]已無行動力，請去面對魔物！[/]");
+            AnsiConsole.MarkupLine("[yellow]進入戰鬥後，會回復點數！[/]");
             Console.ReadKey(true);
             return;  
         }
@@ -130,17 +177,19 @@ class Program
         if (actionPoint < 1)
         {
             AnsiConsole.MarkupLine("[yellow]已無行動力，請去面對魔物！[/]");
+            AnsiConsole.MarkupLine("[yellow]進入戰鬥後，會回復點數！[/]");
             Console.ReadKey(true);
             return;  
         } 
         actionPoint--;
     }
 
-    public static void UseItem(Player player, Monster? monster)
+    public static void UseItem()
     {
         if (actionPoint < 1)
         {
             AnsiConsole.MarkupLine("[yellow]已無行動力，請去面對魔物！[/]");
+            AnsiConsole.MarkupLine("[yellow]進入戰鬥後，會回復點數！[/]");
             Console.ReadKey(true);
             return;  
         } 
@@ -154,7 +203,7 @@ class Program
         if (chosenItem != null)
         {
             // 套用道具效果（扣血/加能力等）
-            Inventory.ApplyItemEffect(chosenItem, player);
+            Inventory.ApplyItemEffect(chosenItem, player, monster);
 
             // 背包扣除 1 個該道具
             Inventory.UseItem(chosenItem.ItemNo);
@@ -162,7 +211,7 @@ class Program
         }
     }
 
-    public static void ShowBothStatus(Player player, Monster monster)
+    public static void ShowBothStatus()
     {
         ShowStatusInfo showStatusInfo = new ShowStatusInfo(player, monster, isShowing);
         showStatusInfo.ShowInfo();
@@ -172,16 +221,18 @@ class Program
     }
 
 
-    public static void StartBattle(Player player, Monster monster)
+    public static void StartBattle()
     {
+        battleCount++;
         // 建立戰鬥系統實例，並啟動戰鬥
         BattleSystem battle = new BattleSystem(player, monster);
         bool isVictory = battle.StartBattle();
 
         // 如果是逃跑出場，就不進行回血，並增加行動力1點
         if (BattleSystem.isPlayerRunning)
-        {            
-            if (actionPoint < 5) actionPoint++;
+        {
+            runningCount++;
+            if (actionPoint < 8) actionPoint += 8;
             return;  
         } 
         
@@ -194,11 +245,23 @@ class Program
         {
             // 勝利恢復狀態
             player.Status = CurrentStatus.Normal;
-            actionPoint = 5;
+            actionPoint = 8;
+            isShowing = false;
+            dayCount++;
+            
+            monster = dayCount switch
+            {
+                2 => new GuestTree(player.Level > 10 ? player.Level : 10),
+                3 => new Stone(player.Level > 20 ? player.Level : 20),
+                4 => new Bird(player.Level > 30 ? player.Level : 30),
+                5 => new DarkHero(player.Level > 40 ? player.Level : 40),
+                _ => new Goblin(player.Level > 5 ? player.Level : 5)
+            };
         }
         else
         {
-            if (actionPoint < 5) actionPoint++;
+            loseCount++;
+            if (actionPoint < 8) actionPoint += 8;
         }
 
     }

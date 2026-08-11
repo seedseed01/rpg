@@ -111,6 +111,7 @@ public class Player
     // 💡 核心：計算傷害的方法 (傳入攻擊者的屬性來算相剋)
     public void TakeDamage(int rawDamage, CurrentType attackerElement, bool isMagicAttack = false)
     {
+        if (rawDamage == 0) return;
         // 1. 決定要用哪種防禦力來抵擋
         int defenseToUse = isMagicAttack ? MagicDefense : Defense;
 

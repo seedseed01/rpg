@@ -7,13 +7,20 @@ namespace rpg;
 public enum EventEffectType
 {
     ExUp,        // 經驗提升
+    HpUp,        // HP增加
+    AtkUp,       // 攻擊加持
+    DefUp,       // 防禦加持
+    MatkUp,      // 魔法攻擊加持
+    MdefUp,      // 魔法防禦加持
+    SpeedUp,     // 速度加持
+
     HpDown,      // HP減少
     MpDown,      // MP減少
-    AtkUp,       // 攻擊加持
-    GoldLoss,    // 金錢損失
-    MatkUp,      // 魔法攻擊加持
+    MatkDown,    // 魔法攻擊減少
+    MdefDown,    // 魔法防禦減少
+    SpeedDown,   // 速度減少
     PointDown,   // 行動力減少
-    SpeedUp,     // 速度加持
+    GoldLoss,    // 金錢損失
 }
 
 public class EventNode

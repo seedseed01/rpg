@@ -47,7 +47,7 @@ public static class GameArt
 
     public const string Day4Art = """
 +=====+
-|Day 1|
+|Day 4|
 +=====+
 """;
 

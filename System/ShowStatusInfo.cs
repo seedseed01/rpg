@@ -46,7 +46,7 @@ public class ShowStatusInfo
             .AddRow("名稱", monster.Name)
             .AddRow("等級", $"[yellow]Lv.{monster.Level}[/]")
             .AddRow("血量 (HP)", $"[red]{monster.CurrentHP} / {monster.HP}[/]")
-            .AddRow("魔力 (MP)", $"[blue]{monster.MP}[/] ")
+            .AddRow("魔力 (MP)", $"[blue]{monster.CurrentMP} / {monster.MP}[/]")
             .AddRow("狀態", $"[green]{monster.Status.ToChinese()}[/]")
             .AddRow("屬性", $"[yellow]{monster.Type.ToChinese()}[/]")
             .AddRow("性格", $"[yellow]{monster.Nature.ToChinese()}[/]")

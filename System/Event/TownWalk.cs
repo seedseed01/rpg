@@ -8,7 +8,6 @@ public class TownWalk
     public void Walk()
     {
         AnsiConsole.Clear();
-        AnsiConsole.MarkupLine($"[bold yellow]{GameArt.Day1Art}[/]");
         AnsiConsole.MarkupLine($"{GameArt.TownArt}");
         AnsiConsole.WriteLine();
 
@@ -28,16 +27,16 @@ public class TownWalk
                     Program.isShowing = true;    
                 }
                 break;
-            case < 40: // 25%
+            case < 50: // 35%
                 // 發現道具
                 AnsiConsole.MarkupLine("[yellow]在村莊撿到道具![/]");
                 GetItem();
                 break;
-            case < 70: // 30%
+            case < 85: // 35%
                 // 村民對話
                 TalkToPerson();
                 break;
-            case < 90: // 20%
+            case < 90: // 5%
                 // 無事發生
                 AnsiConsole.MarkupLine("[yellow]閒晃了一圈，無事發生。[/]");
                 break;

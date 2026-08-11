@@ -6,6 +6,7 @@ public class Monster
     public int HP { get; set; }
     public int CurrentHP { get; set; }
     public int MP { get; set; }
+    public int CurrentMP { get; set; }
     public int Attack { get; set; }
     public int Defense { get; set; }
     public int Speed { get; set; }
@@ -62,6 +63,7 @@ public class Monster
         HP = hp + level * 5;
         CurrentHP = HP;
         MP = mp + level * 5;
+        CurrentMP = MP;
         Attack = (int)(rawAttack * atkMulti);
         Defense = (int)(rawDefense * defMulti);
         MagicAttack = (int)(rawMagicAttack * matkMulti);
@@ -70,7 +72,7 @@ public class Monster
     }
 
     // 💡 核心：計算傷害的方法 (傳入攻擊者的屬性來算相剋)
-    public void TakeDamage(int rawDamage, CurrentType attackerElement, bool isMagicAttack = false)
+    public virtual void TakeDamage(int rawDamage, CurrentType attackerElement, bool isMagicAttack = false)
     {
         // 1. 決定要用哪種防禦力來抵擋
         int defenseToUse = isMagicAttack ? MagicDefense : Defense;
@@ -88,7 +90,7 @@ public class Monster
     }
 
     // 屬性相剋倍率計算
-    private double GetElementModifier(CurrentType attacker, CurrentType defender)
+    protected double GetElementModifier(CurrentType attacker, CurrentType defender)
     {
         if (attacker == CurrentType.Water && defender == CurrentType.Fire) return 1.8; // 水克火 1.8倍
         if (attacker == CurrentType.Fire && defender == CurrentType.Wind) return 1.8; // 火克風 1.8倍
@@ -104,5 +106,12 @@ public class Monster
         if (attacker == CurrentType.Earth && defender == CurrentType.Wind) return 0.6;
         
         return 1.0;
+    }
+
+    public virtual (int damage, bool isMagicAttack) SkillAttack()
+    {
+        int damage = Attack;
+        bool isMagicAttack = false;
+        return (damage, isMagicAttack);
     }
 }

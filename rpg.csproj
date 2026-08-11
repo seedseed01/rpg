@@ -9,10 +9,7 @@
 
   <ItemGroup>
     <PackageReference Include="Spectre.Console" Version="0.57.2" />
-    <!-- 告訴 .NET：建立專案時，自動將 Assets 裡面的所有檔案複製到 bin 輸出資料夾 -->
-    <None Update="Assets\**\*.*">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    <EmbeddedResource Include="Assets\**\*.json" />
   </ItemGroup>
 
 </Project>

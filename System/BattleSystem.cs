@@ -109,6 +109,7 @@ public class BattleSystem
             if(r > 50)
             {
                 AnsiConsole.MarkupLine("你無法行動，因為麻痺");
+                Console.ReadKey(true);
                 return;     
             }
             else

@@ -2,24 +2,31 @@ using System.IO;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Spectre.Console;
+using System.Reflection;
 
 namespace rpg;
 
 public static class StorySystem
 {
     // 讀取 JSON 並播放劇情
-    public static async Task PlayStoryAsync(string jsonFileName)
+    public static async Task PlayStoryAsync()
     {
-        string filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "Scripts", jsonFileName);
+        string resourceName = "rpg.Assets.Scripts.intro.json";
 
-        if (!File.Exists(filePath))
+        var assembly = Assembly.GetExecutingAssembly();
+        using Stream? stream = assembly.GetManifestResourceStream(resourceName);
+
+        if (stream == null)
         {
-            AnsiConsole.MarkupLine($"[red]錯誤：找不到劇情檔案 {jsonFileName}[/]");
+            Console.WriteLine($"[錯誤] 找不到嵌入資源：{resourceName}");
+            // 💡 偵錯小幫手：若找不到名稱，可以印出所有已嵌入的資源名稱來比對
+            // foreach (var name in assembly.GetManifestResourceNames()) Console.WriteLine(name);
             return;
         }
 
-        // 1. 讀取並反序列化 JSON
-        string jsonContent = File.ReadAllText(filePath);
+        using StreamReader reader = new StreamReader(stream);
+        string jsonContent = reader.ReadToEnd();
+
         var dialogues = JsonSerializer.Deserialize<List<DialogueNode>>(jsonContent);
 
         if (dialogues == null) return;

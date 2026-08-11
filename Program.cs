@@ -61,7 +61,7 @@ class Program
     {
         // 玩家選擇職業、個性、屬性
         AnsiConsole.Clear();
-        StorySystem.PlayStoryAsync("intro.json").Wait();
+        StorySystem.PlayStoryAsync().Wait();
 
         player = PlayerStart.SelectedPlayer();
         monster = new Goblin(5);
@@ -115,11 +115,27 @@ class Program
                     StartBattle();
                     break;
                 case 6:
-                    // 離開後初始化數據
-                    actionPoint = 8;
-                    Inventory = new();
-                    isShowing = false;
-                    return;
+                    var d = AnsiConsole.Prompt(
+                        new SelectionPrompt<MenuItem>()
+                            .Title("[cyan]確定返回主選單? 會導致所有紀錄重來[/]")
+                            .UseConverter(item => item.DisplayName)
+                            .PageSize(5)
+                            .AddChoices(new[] {
+                                new MenuItem(1, "否"),
+                                new MenuItem(2, "是"),
+                            }));
+
+                    if (d.Id == 1){
+                        break;
+                    }
+                    else
+                    {
+                        // 離開後初始化數據
+                        actionPoint = 8;
+                        Inventory = new();
+                        isShowing = false;
+                        return;
+                    }
             }
         }
 

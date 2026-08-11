@@ -78,7 +78,7 @@ public class Bird : Monster
         var allTypes = Enum.GetValues<CurrentType>();
         CurrentType newType = allTypes[Random.Shared.Next(allTypes.Length)];
         Type = newType;
-        AnsiConsole.Console.WriteLine($"[bold magenta]{Name}[/] 身體發出微光，屬性隨機轉變成了 [yellow]{Type}[/]！");
+        AnsiConsole.MarkupLine($"[bold magenta]{Name}[/] 身體發出微光，屬性隨機轉變成了 [yellow]{Type}[/]！");
 
         int atkLogic = Random.Shared.Next(0, 10);
         if(CurrentHP < 100 && CurrentMP >= 100 && wing)

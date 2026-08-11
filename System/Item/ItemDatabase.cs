@@ -1,6 +1,7 @@
 using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Reflection;
 
 namespace rpg;
 
@@ -12,16 +13,21 @@ public static class ItemDatabase
 
     public static void Init()
     {
-        string jsonFileName = "item.json";
-        string filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "Scripts", jsonFileName);
+        string resourceName = "rpg.Assets.Scripts.item.json";
 
-        if (!File.Exists(filePath))
+        var assembly = Assembly.GetExecutingAssembly();
+        using Stream? stream = assembly.GetManifestResourceStream(resourceName);
+
+        if (stream == null)
         {
-            Console.WriteLine($"[錯誤] 找不到道具資料庫檔案：{filePath}");
+            Console.WriteLine($"[錯誤] 找不到嵌入資源：{resourceName}");
+            // 💡 偵錯小幫手：若找不到名稱，可以印出所有已嵌入的資源名稱來比對
+            // foreach (var name in assembly.GetManifestResourceNames()) Console.WriteLine(name);
             return;
         }
 
-        string jsonContent = File.ReadAllText(filePath);
+        using StreamReader reader = new StreamReader(stream);
+        string jsonContent = reader.ReadToEnd();
 
         // 記得加上 JsonStringEnumConverter 避免 Enum 轉換失敗！
         var options = new JsonSerializerOptions

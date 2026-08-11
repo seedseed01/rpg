@@ -12,7 +12,7 @@ public class TownWalk
         AnsiConsole.WriteLine();
 
         int Rresult = Random.Shared.Next(0, 100);
-        AnsiConsole.WriteLine(Rresult);
+        AnsiConsole.WriteLine();
         switch (Rresult)
         {
             case < 15:// 15%

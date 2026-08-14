@@ -11,8 +11,12 @@ v1.0.0 版本更新內容<br>
 下載底下的 rpg.exe 檔案。<br>
 雙擊 rpg.exe 即可直接開始遊玩（免安裝 .NET 環境）。<br>
 <br>
+遊戲資訊網站<br>
+https://rpggame.fly.dev/<br>
+<br>
 <img width="923" height="642" alt="image" src="https://github.com/user-attachments/assets/677f6560-c7d5-44d8-a261-2545c8d7c0c1" /><br>
 <br>
 <img width="923" height="642" alt="image" src="https://github.com/user-attachments/assets/ba030de0-7c92-41cb-b7c1-1f7f9d629b4c" /><br>
 <br>
 <img width="923" height="642" alt="image" src="https://github.com/user-attachments/assets/0811338b-2600-428a-80b8-0de3d44d4c6d" /><br>
+

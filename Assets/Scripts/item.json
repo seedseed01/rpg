@@ -82,5 +82,12 @@
     "ItemContent": "可知曉該回合的魔物能力",
     "EffectType": "LookAll",
     "Value": 0
+  },
+  {
+    "ItemNo": 13,
+    "ItemTitle": "大升級藥水",
+    "ItemContent": "可提升自己等級 10等",
+    "EffectType": "LevelUp",
+    "Value": 10
   }
 ]
